@@ -3,6 +3,7 @@
 
 #include "Arduino.h"
 #include "Meteomoment.h"
+#include "PressureSensor.h"
 
 /*
  * This class is resposible of controlling all the sensors and
@@ -12,15 +13,19 @@
 class SensorController
 {
 public:
-  static void init();
+  SensorController() = default;
 
-  static bool check();
+  //Return a meteomoment where every variable is 1 if it is ok or 0 if the sensor fails
+  //static Meteomoment check();
 
-  static Meteomoment GetMeteomoment();
-  static double GetTemperature();
-  static double GetPressure();
-  static double GetHumidity();
-  static double GetPrecipitation();
-  static double GetWind();
-}
+  //static Meteomoment GetMeteomoment();
+  double getTemperature();
+  double getPressure();
+  //static double GetHumidity();
+  //static double GetPrecipitation();
+  //static double GetWind();
+
+private:
+  PressureSensor pressure = PressureSensor(50);
+};
 #endif
