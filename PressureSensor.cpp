@@ -6,14 +6,11 @@ PressureSensor::PressureSensor(unsigned short treshold_in)
   treshold(treshold_in)
 {
   lastTime = static_cast<unsigned short>(millis());
-  //we dont begin() the sensor yet. checkTreshold will take care of that
+  failed = read(); //Read first time to initialize T and P variables without treshold
 }
 
 bool PressureSensor::checkTreshold()
 {
-  if(failed) //reset if failed
-    reset();
-    
   unsigned short dt = static_cast<unsigned short>(millis()) - lastTime;
   if(dt > treshold)
   {
@@ -28,6 +25,10 @@ bool PressureSensor::checkTreshold()
 
 bool PressureSensor::read()
 {
+  if(failed) //try to reset if failed. This will automatically reset first time
+    if(!reset()) //If reset fails, then exit and return false as we didnt read
+      return false;
+  
   char status = max(sensor.startTemperature(), sensor.startPressure(3));
   if(status == 0)
     return false;
@@ -50,11 +51,6 @@ void PressureSensor::reset()
 {
   sensor = SFE_BMP180();
   failed = !sensor.begin();
-
-  if(!failed) //Read first time
-  {
-    failed = read();
-  }
 }
 
 double PressureSensor::getTemperature()
