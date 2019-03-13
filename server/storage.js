@@ -78,8 +78,8 @@ function storeMeteomoment(date, data) {
     });
 }
 
-function retrieveMeteomoment(t) {}
-function retrieveRange(t0, tf, dt, n) {}
+function retrieveMeteomoment(t) {} //TODO
+function retrieveRange(t0, tf, dt, n) {} //TODO
 
 exports.storeMeteomoment = storeMeteomoment;
 exports.retrieveMeteomoment = retrieveMeteomoment;
