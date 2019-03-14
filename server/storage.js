@@ -59,9 +59,12 @@ function storeMeteomoment(date, data) {
             //Create dir, it throws no error if it already exists so wathever
             //Now that it surely exists, append to file taking care of the hours,ç
             //I want to store this sorted
-            let instream = fs.createReadStream(path);
+            let outstream = fs.createWriteStream(
+                joinPath(path, date.getDate() + '.txt'),
+                {flags: 'a'},
+            );
 
-            instream.write(
+            outstream.write(
                 '[' +
                     padZeroes(date.getHours(), 2) +
                     ':' +
@@ -73,8 +76,8 @@ function storeMeteomoment(date, data) {
                     ']\n',
             ); //Write time
             for (prop in data) //Write all properties present in data, followed by newline
-                stream.write(prop + ':' + data[prop] + '\n');
-            stream.end();
+                outstream.write(prop + ':' + data[prop] + '\n');
+            outstream.end();
             //Note: since we have not \r, newlines will not be shown in windows.
             //However, our server isnt that picky so I personally dont care this time.
         });
@@ -83,9 +86,31 @@ function storeMeteomoment(date, data) {
         throw new Error('Cant add meteomoment previous to last one)');
     }
 }
-storeMeteomoment.last = new Date();
+storeMeteomoment.last = new Date(0);
 
-function retrieveMeteomoment(t) {} //TODO
+function retrieveMeteomoment(t) {
+    function linearInterpolation(a, b, p) {
+        return a + (b - a) * p;
+    }
+
+    return new Promise((resolve, reject) => {
+        let path = joinPath(
+            'data',
+            t.getFullYear().toString(),
+            (t.getMonth() + 1).toString(),
+            t.getDate() + '.txt',
+        );
+
+        fs.access(path, fs.F_OK)
+            .then(() => {
+                //Binary search 
+            })
+            .catch(err => {
+                //No data stored of this date
+                reject('No data stored');
+            });
+    });
+}
 function retrieveRange(t0, tf, dt, n) {} //TODO
 
 exports.storeMeteomoment = storeMeteomoment;
