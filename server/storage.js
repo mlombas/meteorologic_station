@@ -45,38 +45,45 @@ function getDirectoryTree(path, excluded = /[]/) {
 }
 
 function storeMeteomoment(date, data) {
-    let path = joinPath(
-        //Path will be year/month/day.txt, this way it is easier to find things
-        'data',
-        date.getFullYear().toString(),
-        (date.getMonth() + 1).toString(), //Month is for some reason returned in range [1, 11]
-    );
-    mkdirp(path).then(() => {
-        //Create dir, it throws no error if it already exists so wathever
-        //Now that it surely exists, append to file
-        let stream = fs.createWriteStream(
-            joinPath(path, date.getDate().toString() + '.txt'),
-            {flags: 'a'},
-        );
+    if (date > storeMeteomoment.last) {
+        //Normal case: new meteomoment is posterior to last one
+        storeMeteomoment.last = date;
 
-        stream.write(
-            '[' +
-                padZeroes(date.getHours(), 2) +
-                ':' +
-                padZeroes(date.getMinutes(), 2) +
-                ':' +
-                padZeroes(date.getSeconds(), 2) +
-                ':' +
-                padZeroes(date.getMilliseconds(), 4) +
-                ']\n',
-        ); //Write time
-        for (prop in data) //Write all properties present in data, followed by newline
-            stream.write(prop + ':' + data[prop] + '\n');
-        stream.end();
-        //Note: since we have not \r, newlines will not be shown in windows.
-        //However, our server isnt that picky so I personally dont care this time.
-    });
+        let path = joinPath(
+            //Path will be year/month/day.txt, this way it is easier to find things
+            'data',
+            date.getFullYear().toString(),
+            (date.getMonth() + 1).toString(), //Month is for some reason returned in range [1, 11]
+        );
+        mkdirp(path).then(() => {
+            //Create dir, it throws no error if it already exists so wathever
+            //Now that it surely exists, append to file taking care of the hours,ç
+            //I want to store this sorted
+            let instream = fs.createReadStream(path);
+
+            instream.write(
+                '[' +
+                    padZeroes(date.getHours(), 2) +
+                    ':' +
+                    padZeroes(date.getMinutes(), 2) +
+                    ':' +
+                    padZeroes(date.getSeconds(), 2) +
+                    ':' +
+                    padZeroes(date.getMilliseconds(), 4) +
+                    ']\n',
+            ); //Write time
+            for (prop in data) //Write all properties present in data, followed by newline
+                stream.write(prop + ':' + data[prop] + '\n');
+            stream.end();
+            //Note: since we have not \r, newlines will not be shown in windows.
+            //However, our server isnt that picky so I personally dont care this time.
+        });
+    } else {
+        //If meteomoment is previous to last one we are in trouble
+        throw new Error('Cant add meteomoment previous to last one)');
+    }
 }
+storeMeteomoment.last = new Date();
 
 function retrieveMeteomoment(t) {} //TODO
 function retrieveRange(t0, tf, dt, n) {} //TODO
